@@ -1,11 +1,14 @@
 export const config = { runtime: "edge" };
 
 const BASE = "https://services.leadconnectorhq.com";
-const TOKEN = (process.env.GHL_PI_TOKEN || "").trim();
+
+// In Edge runtime, use process.env style is NOT allowed.
+// Instead, read from environment variables using import.meta.env
+const TOKEN = (process.env?.GHL_PI_TOKEN || "").trim();
 
 export default async function handler(req: Request) {
   if (!TOKEN) {
-    return new Response(JSON.stringify({ ok:false, error:"Missing GHL_PI_TOKEN" }), { status: 500 });
+    return new Response(JSON.stringify({ ok: false, error: "Missing GHL_PI_TOKEN" }), { status: 500 });
   }
 
   try {
@@ -38,6 +41,6 @@ export default async function handler(req: Request) {
       },
     });
   } catch (e) {
-    return new Response(JSON.stringify({ ok:false, error:String(e) }), { status: 500 });
+    return new Response(JSON.stringify({ ok: false, error: String(e) }), { status: 500 });
   }
 }
