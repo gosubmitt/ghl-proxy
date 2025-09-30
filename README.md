@@ -1,1 +1,1 @@
-# ghl-proxy
+# ghl-proxy.ts
