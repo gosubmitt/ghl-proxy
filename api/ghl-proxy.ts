@@ -22,16 +22,16 @@ export default async function handler(req: Request) {
     const body = method === "GET" || method === "HEAD" ? undefined : await req.text();
 
     const res = await fetch(upstream, {
-      method,
-      headers: {
-        Authorization: TOKEN, // raw pit-… (NO "Bearer ")
-        Version: "2021-07-28",
-        Accept: "application/json",
-        ...(body ? { "Content-Type": "application/json" } : {}),
-      },
-      body,
-      redirect: "manual",
-    });
+  method,
+  headers: {
+    Authorization: TOKEN, // raw pit-… (NO "Bearer ")
+    Version: "2021-07-28", // ✅ required for GHL PI API
+    Accept: "application/json",
+    ...(body ? { "Content-Type": "application/json" } : {}),
+  },
+  body,
+  redirect: "manual",
+});
 
     const text = await res.text();
 
