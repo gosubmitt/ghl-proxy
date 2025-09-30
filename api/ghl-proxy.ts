@@ -12,9 +12,14 @@ export default async function handler(req: Request) {
   }
 
   try {
-    const { pathname, search } = new URL(req.url);
-    // strip /api/ghl-proxy so /api/ghl-proxy/locations/self → /locations/self
-    const upstream = BASE + pathname.replace(/^\/api\/ghl-proxy/, "") + search;
+    const url = new URL(req.url);
+
+    // Force-strip ONLY the first /api/ghl-proxy
+    const stripped = url.pathname.startsWith("/api/ghl-proxy")
+      ? url.pathname.substring("/api/ghl-proxy".length)
+      : url.pathname;
+
+    const upstream = BASE + stripped + url.search;
 
     const method = req.method;
     const body = method === "GET" || method === "HEAD" ? undefined : await req.text();
