@@ -1,8 +1,6 @@
 export const config = { runtime: "edge" };
 
 const BASE = "https://services.leadconnectorhq.com";
-
-// Vercel injects env vars at runtime; Edge functions can read them like this:
 const TOKEN = process.env.GHL_PI_TOKEN?.trim() || "";
 
 export default async function handler(req: Request) {
@@ -15,23 +13,23 @@ export default async function handler(req: Request) {
 
   try {
     const { pathname, search } = new URL(req.url);
-    // map /api/ghl-proxy/... → https://services.leadconnectorhq.com/...
-    const upstream = BASE + pathname.replace("/api/ghl-proxy", "") + search;
+    // strip /api/ghl-proxy so /api/ghl-proxy/locations/self → /locations/self
+    const upstream = BASE + pathname.replace(/^\/api\/ghl-proxy/, "") + search;
 
     const method = req.method;
     const body = method === "GET" || method === "HEAD" ? undefined : await req.text();
 
     const res = await fetch(upstream, {
-  method,
-  headers: {
-    Authorization: TOKEN, // raw pit-… (NO "Bearer ")
-    Version: "2021-07-28", // ✅ required for GHL PI API
-    Accept: "application/json",
-    ...(body ? { "Content-Type": "application/json" } : {}),
-  },
-  body,
-  redirect: "manual",
-});
+      method,
+      headers: {
+        Authorization: TOKEN,
+        Version: "2021-07-28", // required by GHL PI API
+        Accept: "application/json",
+        ...(body ? { "Content-Type": "application/json" } : {}),
+      },
+      body,
+      redirect: "manual",
+    });
 
     const text = await res.text();
 
@@ -39,7 +37,6 @@ export default async function handler(req: Request) {
       status: res.status,
       headers: {
         "content-type": res.headers.get("content-type") || "application/json",
-        "x-request-id": res.headers.get("x-request-id") || res.headers.get("x-amzn-requestid") || "",
         "cache-control": "no-store",
       },
     });
